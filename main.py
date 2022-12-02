@@ -1,5 +1,5 @@
 from typing import Union
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Path
 from pydantic import BaseModel
 from enum import Enum
 
@@ -173,6 +173,18 @@ async def read_items_query_metadata(
 @app.get("/items-query-alias")
 async def read_items_query_alias(q: str | None = Query(default=None, alias="item-query")):
     results = {"items": [{"item_id": "foo"}, {"item_id": "bar"}]}
+    if q:
+        results.update({"q": q})
+    return results
+
+
+# =================== Path parameters and Numeric validation =================================
+
+@app.get("/items-path-parameters/{item_id}")
+async def read_items_path_parameters(
+        item_id: int = Path(title="the ID of the item to get"),
+        q: str | None = Query(default=None, alias="item-query")):
+    results = {"item_id": item_id}
     if q:
         results.update({"q": q})
     return results
