@@ -1,5 +1,5 @@
 from typing import Union
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from pydantic import BaseModel
 from enum import Enum
 
@@ -122,3 +122,57 @@ async def update_item2(item_id: int, item: Item2, q: str | None = None):
     if q:
         result.update({"q": q})
     return result
+
+
+# ======================= Query Parameters and String Validators =============================
+# Optional query parameters
+@app.get("/items-optional/")
+async def read_items_optional(q: str | None = Query(default=None, min_length=3, max_length=50, regex="^fixedquery$")):
+    results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+    if q:
+        results.update({"q": q})
+    return results
+
+
+@app.get("/items-required/")
+async def read_items_optional(q: str = Query(min_length=3, max_length=50, regex="^fixedquery$")):
+    results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+    if q:
+        results.update({"q": q})
+    return results
+
+
+@app.get("/items-required-ellipsis/")
+async def read_items_optional(q: str = Query(default=..., max_length=5)):
+    results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+    if q:
+        results.update({"q": q})
+    return results
+
+
+@app.get("/items-query-list")
+async def read_items_query_list(q: list[str] | None = Query(default=None)):
+    query_items = {"q": q}
+    return query_items
+
+
+@app.get("/items-query-metadata")
+async def read_items_query_metadata(
+        q: str | None = Query(
+            default=None,
+            title="Query String Title",
+            description="Query String Description",
+            min_length=3, )
+):
+    results = {"items": [{"item_id": "foo"}, {"item_id": "bar"}]}
+    if q:
+        results.update({"q": q})
+    return results
+
+
+@app.get("/items-query-alias")
+async def read_items_query_alias(q: str | None = Query(default=None, alias="item-query")):
+    results = {"items": [{"item_id": "foo"}, {"item_id": "bar"}]}
+    if q:
+        results.update({"q": q})
+    return results
