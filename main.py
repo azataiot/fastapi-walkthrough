@@ -188,3 +188,5 @@ async def read_items_path_parameters(
     if q:
         results.update({"q": q})
     return results
+
+
