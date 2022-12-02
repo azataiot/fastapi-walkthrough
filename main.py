@@ -1,5 +1,5 @@
 from typing import Union
-from fastapi import FastAPI, Query, Path
+from fastapi import FastAPI, Query, Path, Body
 from pydantic import BaseModel
 from enum import Enum
 
@@ -190,3 +190,37 @@ async def read_items_path_parameters(
     return results
 
 
+# =========================== Body Multiple Parameters =================================
+
+class Item3(BaseModel):
+    name: str
+    description: str | None = None
+    price: float
+    tax: float | None = None
+
+
+class User3(BaseModel):
+    username: str
+    full_name: str | None = None
+
+
+@app.put("/items-body2/{item_id}")
+async def update_item3(
+        *,  # count the parameters as key word parameters
+        item_id: int = Path(title="the ID of the item to update", ge=0, le=1000),
+        q: str | None = None,
+        item: Item3,
+        user: User3,
+):
+    results = {"item_id": item_id}
+    if q:
+        results.update({"q": q})
+    if item:
+        results.update({"item": item})
+    return results
+
+
+@app.put("/items-importance/{item_id}")
+async def update_item(item_id: int, item: Item3, user: User3, importance: int = Body()):
+    results = {"item_id": item_id, "item": item, "user": user, "importance": importance}
+    return results
