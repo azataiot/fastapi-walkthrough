@@ -1,6 +1,6 @@
 from typing import Union
 from fastapi import FastAPI, Query, Path, Body
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from enum import Enum
 
 app = FastAPI()
@@ -223,4 +223,23 @@ async def update_item3(
 @app.put("/items-importance/{item_id}")
 async def update_item(item_id: int, item: Item3, user: User3, importance: int = Body()):
     results = {"item_id": item_id, "item": item, "user": user, "importance": importance}
+    return results
+
+
+# =============== Body Fields =============
+
+class Item4(BaseModel):
+    name: str
+    description: str | None = Field(
+        default=None,
+        title="The description of the item",
+        max_length=300
+    )
+    price: float = Field(gt=0, description="The price must be greater than 0")
+    tax: float | None = None
+
+
+@app.put("/items4/{item_id}")
+async def update_item4(item_id: int, item: Item4 = Body(embed=True)):
+    results = {"item_id": item_id, "item": item}
     return results
