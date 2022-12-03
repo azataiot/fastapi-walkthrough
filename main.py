@@ -1,6 +1,6 @@
 from typing import Union
 from fastapi import FastAPI, Query, Path, Body
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 from enum import Enum
 
 app = FastAPI()
@@ -243,3 +243,59 @@ class Item4(BaseModel):
 async def update_item4(item_id: int, item: Item4 = Body(embed=True)):
     results = {"item_id": item_id, "item": item}
     return results
+
+
+# ======================== Body Nested Models =============================
+class Item5(BaseModel):
+    name: str
+    description: str | None = None
+    price: float
+    tax: float | None = None
+    tags: set[str] = set()
+
+
+@app.put("/items5/{item_id}")
+async def update_item(item_id: int, item: Item5):
+    results = {"item_id": item_id, "item": item}
+    return results
+
+
+class Image(BaseModel):
+    url: HttpUrl
+    name: str
+
+
+class Item6(BaseModel):
+    name: str
+    description: str | None = None
+    price: float
+    tax: float | None = None
+    tags: set[str] = set()
+    image: Image | None = None
+
+
+@app.put("/items6/{item_id}")
+async def update_item(item_id: int, item: Item6):
+    results = {"item_id": item_id, "item": item}
+    return results
+
+
+class Item7(BaseModel):
+    name: str
+    description: str | None = None
+    price: float
+    tax: float | None = None
+    tags: set[str] = set()
+    images: list[Image] | None = None
+
+
+# pure list
+@app.post("/images/multiple/")
+async def create_multiple_images(images: list[Image]):
+    return images
+
+
+# bodies with arbitrary dict
+@app.post("/index-weights/")
+async def create_index_weights(weights: dict[int, float]):
+    return weights
