@@ -299,3 +299,41 @@ async def create_multiple_images(images: list[Image]):
 @app.post("/index-weights/")
 async def create_index_weights(weights: dict[int, float]):
     return weights
+
+
+# ================== Declare Request Example Data =============================
+
+class Item8(BaseModel):
+    name: str
+    description: str | None = None
+    price: float
+    tax: float | None = None
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "name": "example",
+                "description": "example description",
+                "price": 10.0,
+                "tax": 3.34
+            }
+        }
+
+
+@app.put("/items8/{item_id}")
+async def update_item8(item_id: int, item: Item8):
+    results = {"item_id": item_id, "item": item}
+    return results
+
+
+class Item9(BaseModel):
+    name: str = Field(example="Foo")
+    description: str | None = Field(default=None, example="A very nice Item")
+    price: float = Field(example=35.4)
+    tax: float | None = Field(default=None, example=3.2)
+
+
+@app.put("/items9/{item_id}")
+async def update_item8(item_id: int, item: Item9):
+    results2 = {"item_id": item_id, "item": item}
+    return results2
