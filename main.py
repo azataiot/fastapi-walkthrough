@@ -3,7 +3,7 @@ from typing import Union
 from uuid import UUID
 
 from fastapi import FastAPI, Query, Path, Body, Cookie, Header
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field, HttpUrl, EmailStr, SecretStr
 from enum import Enum
 
 app = FastAPI()
@@ -376,3 +376,27 @@ async def read_items11(ads_id: str | None = Cookie(default=None)):
 @app.get("/header/")
 async def read_header(user_agent: str | None = Header(default=None), x_token: str | None = Header(default=None)):
     return {"User-Agent": user_agent, "X-Token": x_token}
+
+
+# ================ Response Body ==================
+@app.get("/response_body/", response_model=Item8)
+async def read_response_body():
+    return {"item_id": 1, "name": "Foo", "description": "A very nice Item", "price": 10.0, "tax": 3.34}
+
+
+class UserIn(BaseModel):
+    username: str
+    email: EmailStr
+    password: SecretStr
+    full_name: str | None = None
+
+
+class UserOut(BaseModel):
+    username: str
+    email: EmailStr
+    full_name: str | None = None
+
+
+@app.post("/users/", response_model=UserOut)
+async def create_user(user: UserIn):
+    return user
