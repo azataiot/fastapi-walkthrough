@@ -384,19 +384,56 @@ async def read_response_body():
     return {"item_id": 1, "name": "Foo", "description": "A very nice Item", "price": 10.0, "tax": 3.34}
 
 
-class UserIn(BaseModel):
+class UserIn0(BaseModel):
     username: str
     email: EmailStr
     password: SecretStr
     full_name: str | None = None
 
 
-class UserOut(BaseModel):
+class UserOut0(BaseModel):
     username: str
     email: EmailStr
     full_name: str | None = None
 
 
-@app.post("/users/", response_model=UserOut)
-async def create_user(user: UserIn):
+@app.post("/users/", response_model=UserOut0)
+async def create_user(user: UserIn0):
     return user
+
+
+# =========== Extra Models ============
+class UserBase(BaseModel):
+    username: str
+    email: EmailStr
+    full_name: str | None = None
+
+
+class UserIn(UserBase):
+    password: str
+
+
+class UserOut(UserBase):
+    pass
+
+
+class UserInDB(UserBase):
+    hashed_password: str
+
+
+def fake_password_hasher(raw_password: str):
+    return "supersecret" + raw_password
+
+
+def fake_save_user(user_in: UserIn):
+    hashed_password = fake_password_hasher(user_in.password)
+    user_in_db = UserInDB(**user_in.dict(), hashed_password=hashed_password)
+    print("User saved! ..not really")
+    return user_in_db
+
+
+@app.post("/users-extra/", response_model=UserOut)
+async def create_user(user_in: UserIn):
+    user_saved = fake_save_user(user_in)
+    print(user_saved)
+    return user_saved
