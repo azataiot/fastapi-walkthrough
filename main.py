@@ -2,7 +2,7 @@ from datetime import datetime, time, timedelta
 from typing import Union
 from uuid import UUID
 
-from fastapi import FastAPI, Query, Path, Body, Cookie, Header
+from fastapi import FastAPI, Query, Path, Body, Cookie, Header, Form
 from pydantic import BaseModel, Field, HttpUrl, EmailStr, SecretStr
 from enum import Enum
 
@@ -443,3 +443,9 @@ async def create_user(user_in: UserIn):
 @app.post("/items/", status_code=201)
 async def create_item(name: str):
     return {"name": name}
+
+
+# ============== Form Data ===============
+@app.post("/login/")
+async def login(username: str = Form(), password: str = Form()):
+    return {"username": username}
