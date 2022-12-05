@@ -2,7 +2,7 @@ from datetime import datetime, time, timedelta
 from typing import Union
 from uuid import UUID
 
-from fastapi import FastAPI, Query, Path, Body, Cookie
+from fastapi import FastAPI, Query, Path, Body, Cookie, Header
 from pydantic import BaseModel, Field, HttpUrl
 from enum import Enum
 
@@ -370,3 +370,9 @@ async def read_items(
 async def read_items11(ads_id: str | None = Cookie(default=None)):
     print(ads_id)
     return {"ads_id": ads_id}
+
+
+# ================ Header Parameters ==================
+@app.get("/header/")
+async def read_header(user_agent: str | None = Header(default=None), x_token: str | None = Header(default=None)):
+    return {"User-Agent": user_agent, "X-Token": x_token}
