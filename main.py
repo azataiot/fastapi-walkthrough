@@ -437,3 +437,9 @@ async def create_user(user_in: UserIn):
     user_saved = fake_save_user(user_in)
     print(user_saved)
     return user_saved
+
+
+# ============== Response Status Code ==============
+@app.post("/items/", status_code=201)
+async def create_item(name: str):
+    return {"name": name}
