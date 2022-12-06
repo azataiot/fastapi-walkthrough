@@ -479,3 +479,15 @@ async def create_multi_files(files: list[bytes] = File(description="Multiple fil
 @app.post("/upload-multiple-files/")
 async def create_upload_files2(files: list[UploadFile] = File(description="Multiple upload files as UploadFile")):
     return {"filenames": [file.filename for file in files]}
+
+
+# ============== Request Files and Forms ==============
+@app.post("/token-files/")
+async def create_file(
+        file: bytes = File(), fileb: UploadFile = File(), token: str = Form()
+):
+    return {
+        "file_size": len(file),
+        "token": token,
+        "fileb_content_type": fileb.content_type,
+    }
