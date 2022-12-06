@@ -2,7 +2,7 @@ from datetime import datetime, time, timedelta
 from typing import Union
 from uuid import UUID
 
-from fastapi import FastAPI, Query, Path, Body, Cookie, Header, Form
+from fastapi import FastAPI, Query, Path, Body, Cookie, Header, Form, File, UploadFile
 from pydantic import BaseModel, Field, HttpUrl, EmailStr, SecretStr
 from enum import Enum
 
@@ -449,3 +449,33 @@ async def create_item(name: str):
 @app.post("/login/")
 async def login(username: str = Form(), password: str = Form()):
     return {"username": username}
+
+
+# ============== Request Files ==============
+@app.post("/files/")
+async def create_file(file: bytes | None = File(default=None, description="A file read as bytes")):
+    # whole content will be saved in the memory as bytes
+    if not file:
+        return {"message": "No file sent"}
+    else:
+        return {"file_size": len(file)}
+
+
+@app.post("/uploadfile/")
+async def create_upload_file(file: UploadFile | None = File(default=None, description="A file read as UploadFile")):
+    if not file:
+        return {"message": "No upload file sent"}
+    else:
+        contents = await file.read()
+        print(contents)
+        return {"filename": file.filename, "content_type": file.content_type, "file": file}
+
+
+@app.post("/multi-files/")
+async def create_multi_files(files: list[bytes] = File(description="Multiple files as bytes")):
+    return {"file_sizes": [len(file) for file in files]}
+
+
+@app.post("/upload-multiple-files/")
+async def create_upload_files2(files: list[UploadFile] = File(description="Multiple upload files as UploadFile")):
+    return {"filenames": [file.filename for file in files]}
