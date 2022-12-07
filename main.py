@@ -3,6 +3,7 @@ from typing import Union
 from uuid import UUID
 
 from fastapi import FastAPI, Query, Path, Body, Cookie, Header, Form, File, UploadFile, Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel, Field, HttpUrl, EmailStr, SecretStr
 from enum import Enum
 
@@ -596,3 +597,46 @@ async def dependency_c(dep_b=Depends(dependency_b)):
         yield dep_c
     finally:
         dep_c.close(dep_b)
+
+
+# ============== Security ================
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+
+# tokenUrl="token" refers to a relative URL token, it's equivalent to ./token
+
+
+@app.get("/items13/")
+async def read_items(token: str = Depends(oauth2_scheme)):
+    # This dependency will provide a str that is assigned to the parameter token of the path operation function.
+    return {"token": token}
+
+
+class User4(BaseModel):
+    username: str
+    email: str | None = None
+    full_name: str | None = None
+    disabled: bool | None = None
+
+
+def fake_decode_token(token):
+    user = User4(
+        username=token + "fake_decoded",
+        email="sample@example.com",
+        full_name="John Doe",
+        disabled=False
+    )
+    print(user)
+    return user
+
+
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    print(token)
+    user = fake_decode_token(token)
+    print(user)
+    return user
+
+
+@app.get("/users-token/me")
+async def read_users_me(current_user: User4 = Depends(get_current_user)):
+    return current_user
