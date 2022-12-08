@@ -1,7 +1,7 @@
 # sql_app / main.py
 # Created by azat at 8.12.2022
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from sqlalchemy.orm import Session
 
 from . import crud, models, schemas
@@ -12,23 +12,43 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 
-# Dependency
-def get_db():
-    # Now use the SessionLocal class we created in the sql_app/database.py file to create a dependency.
-    db = SessionLocal()
-    # The parameter db is actually of type SessionLocal, but this class (created with sessionmaker()) is a
-    # "proxy" of a SQLAlchemy Session, so, the editor doesn't really know what methods are provided.
-    #
-    # But by declaring the type as Session, the editor now can know the available methods
-    # (.add(), .query(), .commit(), etc) and can provide better support (like completion).
-    # The type declaration doesn't affect the actual object.
+@app.middleware("http")
+async def db_session_middleware(request: Request, call_next):
+    # It's probably better to use dependencies with yield when they are enough for the use case.
+    response = Response("Internal server error", status_code=500)
     try:
-        # We need to have an independent database session/connection (SessionLocal) per request,
-        # use the same session through all the request and then close it after the request is finished.
-        yield db
+        # request.state is a property of each Request object. It is there to
+        # store arbitrary objects attached to the request itself, like the database session in this case.
+        # For us in this case, it helps us ensure a single database session is used through all the request,
+        # and then closed afterwards (in the middleware).
+        request.state.db = SessionLocal()
+        response = await call_next(request)
     finally:
-        # This way we make sure the database session is always closed after the request.
-        db.close()
+        request.state.db.close()
+    return response
+
+
+# Dependency
+# def get_db():
+#     # Now use the SessionLocal class we created in the sql_app/database.py file to create a dependency.
+#     db = SessionLocal()
+#     # The parameter db is actually of type SessionLocal, but this class (created with sessionmaker()) is a
+#     # "proxy" of a SQLAlchemy Session, so, the editor doesn't really know what methods are provided.
+#     #
+#     # But by declaring the type as Session, the editor now can know the available methods
+#     # (.add(), .query(), .commit(), etc) and can provide better support (like completion).
+#     # The type declaration doesn't affect the actual object.
+#     try:
+#         # We need to have an independent database session/connection (SessionLocal) per request,
+#         # use the same session through all the request and then close it after the request is finished.
+#         yield db
+#     finally:
+#         # This way we make sure the database session is always closed after the request.
+#         db.close()
+
+# Dependency
+def get_db(request: Request):
+    return request.state.db
 
 
 @app.post("/users/", response_model=schemas.User)
