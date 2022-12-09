@@ -358,6 +358,7 @@ cython_debug/
 # Poetry local configuration file - https://python-poetry.org/docs/configuration/#local-configuration
 poetry.toml
 
+venv-sample/
 
 ### Windows ###
 # Windows thumbnail cache files
