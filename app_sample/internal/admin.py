@@ -1,4 +1,4 @@
-# app/internal / admin.py
+# app_sample/internal / admin.py
 # Created by azat at 8.12.2022
 
 from fastapi import APIRouter

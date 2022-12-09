@@ -1,4 +1,4 @@
-# app/routers / items.py
+# app_sample/routers / items.py
 # Created by azat at 8.12.2022
 
 from fastapi import APIRouter, Depends, HTTPException

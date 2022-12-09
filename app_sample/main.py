@@ -1,6 +1,6 @@
-# app / main.py
+# app_sample / main.py
 # Created by azat at 8.12.2022
-from app.routers import items
+from app_sample.routers import items
 
 from fastapi import Depends, FastAPI
 

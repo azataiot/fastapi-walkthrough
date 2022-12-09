@@ -1,4 +1,4 @@
-# app / dependencies.py
+# app_sample / dependencies.py
 # Created by azat at 8.12.2022
 
 from fastapi import Header, HTTPException

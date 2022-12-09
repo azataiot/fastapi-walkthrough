@@ -1,4 +1,4 @@
-# app/routers / users.py
+# app_sample/routers / users.py
 # Created by azat at 8.12.2022
 
 from fastapi import APIRouter
